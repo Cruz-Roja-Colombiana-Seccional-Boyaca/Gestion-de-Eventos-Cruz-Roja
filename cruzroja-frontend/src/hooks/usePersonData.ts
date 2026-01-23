@@ -52,7 +52,6 @@ export function usePersonData() {
       const normalized = normalizeGroups(groupsData);
       setGroups(normalized);
       setUnlinked(inactivateData);
-      console.log(inactivateData);
     } finally {
       setLoading(false);
     }
