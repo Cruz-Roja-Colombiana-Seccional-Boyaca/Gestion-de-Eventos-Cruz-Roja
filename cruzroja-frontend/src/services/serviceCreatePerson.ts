@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { formCreatePerson } from "@/types/usertType";
+import { formCreatePerson, formCreatePerson2 } from "@/types/usertType";
 import { supabase } from "@/lib/supabase-browser";
 
 const sb = supabase();
@@ -17,7 +17,7 @@ function authHeaders(token: string | null) {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export async function createPersonService(person: formCreatePerson) {
+export async function createPersonService(person: formCreatePerson2) {//formCreatePerson) {
   try {
     const token = await getAccessToken();
 

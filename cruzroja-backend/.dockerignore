@@ -1,0 +1,22 @@
+# Dependencies (installed in the container)
+node_modules/
+# Build outputs (built in the container, if applicable)
+dist/
+build/
+# Environment files (secrets)
+.env
+.env.*
+# Version control
+.git/
+.gitignore
+# Development/OS files
+.vscode/
+*.log
+npm-debug.log*
+coverage/
+.eslintcache
+.DS_Store
+Thumbs.db
+# Docker related files
+Dockerfile
+docker-compose*.yml

@@ -23,9 +23,6 @@ import { Type } from 'class-transformer';
 import { type_affiliation } from 'src/modules/eps-person/enum/eps-person.enum';
 
 export class CreatePersonDto {
-  @IsNotEmpty()
-  @IsString()
-  id: string;
   @IsEnum(type_document, { message: 'El tipo seleccionado no es valido' })
   type_document: type_document;
   @IsNotEmpty({ message: 'El numero de documento es obligatorio' })
@@ -100,9 +97,6 @@ export class CreatePersonDto {
   @IsOptional()
   @Min(1)
   id_state: number;
-  @IsString()
-  @IsNotEmpty({ message: 'El dato es obligatorio y de suma importancia' })
-  password: string;
   @IsArray()
   @IsNotEmpty({ message: 'Minimo debe tener una habilidad' })
   @Type(() => Number)

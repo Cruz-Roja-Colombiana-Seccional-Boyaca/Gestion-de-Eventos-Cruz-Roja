@@ -78,6 +78,37 @@ export type formCreatePerson = {
   type_affiliation: string;
 };
 
+export type formCreatePerson2 = {
+  type_document: string;
+  document: string;
+  carnet: string;
+  name: string;
+  lastName: string;
+  email: string;
+  sex: string;
+  gender: string;
+  phone: string;
+  skills: string[];
+  emergencyContact: {
+    name: string;
+    relationShip: string;
+    phone: string;
+  };
+  blood: string;
+  id_state: string;
+  birthDate: string;
+  address: {
+    streetAddress: string;
+    zone: string;
+  };
+  id_group?: string;
+  id_program?: string;
+  id_headquarters: string;
+  id_location: string;
+  id_eps: string;
+  type_affiliation: string;
+}
+
 export type sectional = {
   id?: string;
   city: string;

@@ -34,6 +34,8 @@ import { GetReportUnlinked } from './dto/get-report-unlinked';
 import { GetDashboardCards } from './dto/get-dashboard-cards';
 import { Event } from '../event/entity/event.entity';
 import { NotificationPersonService } from '../notification-person/notification-person.service';
+import { SupabaseService } from '../../common/config/supabase/supabase.service';
+import { SupabaseClient, User } from '@supabase/supabase-js';
 
 @Injectable()
 export class PersonService {
@@ -47,6 +49,7 @@ export class PersonService {
     private personSkillService: PersonSkillService,
     private personRoleService: PersonRoleService,
     private notificationPersonService: NotificationPersonService,
+    private supabaseService: SupabaseService,
   ) {}
 
   async getLoginPerson(id: string): Promise<GetLoginPersonDto> {
@@ -337,10 +340,76 @@ export class PersonService {
     };
   }
 
-  async create(dto: CreatePersonDto) {
+  async existsByDocument(document: string): Promise<boolean> {
+    const person = await this.personRepository.findOne({
+      where: {
+        document: document,
+      },
+    });
+    return person !== null;
+  }
+
+  private generatePassword(length: number = 12): string {
+    const sets = {
+      upper: "ABCDEFGHJKLMNPQRSTUVWXYZ",
+      lower: "abcdefghijkmnopqrstuvwxyz",
+      number: "23456789",
+      symbol: "!@#$%^&*()-_=+[]{};:,.?",
+    };
+
+    let pool = sets.upper + sets.lower + sets.number + sets.symbol;
+
+    const mustInclude = [
+      pick(sets.upper),
+      pick(sets.lower),
+      pick(sets.number),
+      pick(sets.symbol),
+    ];
+
+    const result = [...mustInclude];
+    while (result.length < length) result.push(pick(pool));
+
+    shuffle(result);
+    return result.join("");
+
+    function pick(chars: string) {
+      const arr = new Uint32Array(1);
+      crypto.getRandomValues(arr);
+      return chars[arr[0] % chars.length];
+    }
+
+    function shuffle(a: string[]) {
+      const arr = new Uint32Array(a.length);
+      crypto.getRandomValues(arr);
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = arr[i] % (i + 1);
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+    }
+  }
+
+  async registerUser(email: string): Promise<string> {
+    const supabase: SupabaseClient<any> = this.supabaseService.getClient();
+    const password = this.generatePassword(12);
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password,
+      options: {
+        emailRedirectTo: `${process.env.ALLOWED_ORIGINS}/auth/reset`,
+      }
+    });
+    if (error) {
+      console.error(error)
+      throw new Error("No se pudo crear el usuario");
+    }
+    const userId = data.user?.id ?? "";
+    return userId;
+  }
+
+  async create(dto: CreatePersonDto, userId: string) {
     return this.personRepository.manager.transaction(async (manager) => {
       const person: Person = manager.create(Person, {
-        id: dto.id,
+        id: userId,
         type_document: dto.type_document,
         document: dto.document,
         name: NormalizeString(dto.name),
@@ -370,19 +439,19 @@ export class PersonService {
       await manager.save(person);
       await this.associateEps(
         manager,
-        dto.id,
+        userId,
         dto.id_eps,
         dto.type_affiliation,
       );
       await this.associateRole(
         manager,
-        dto.id,
+        userId,
         dto.id_headquarters,
         dto.id_group,
         dto.id_program,
       );
-      await this.associateStatus(manager, dto.id, dto.id_state);
-      await this.associateSkills(manager, dto.skills, dto.id);
+      await this.associateStatus(manager, userId, dto.id_state);
+      await this.associateSkills(manager, dto.skills, userId);
       //await this.sendEmail(dto.email, dto.password);
       return { success: true, message: 'Persona creada exitosamente.' };
     });

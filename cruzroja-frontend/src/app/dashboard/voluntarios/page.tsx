@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useMemo, useState } from "react";
 import VolunteerWizard from "@/components/forms/formCreateUser";
 import { Eye, PencilLine } from "lucide-react";
-import { formCreatePerson, FormState, sectional } from "@/types/usertType";
+import { formCreatePerson, FormState, formCreatePerson2 } from "@/types/usertType";
 import ViewUser from "@/components/cards/viewUser";
 import { supabase } from "@/lib/supabase-browser";
 import { generatePassword } from "@/utils/generatePassword";
@@ -122,12 +122,14 @@ export default function Voluntarios() {
         setOpenWizard(false);
           await reload();
       } else {
-        const reg = await register(data);
-        const newData = {
-          ...data,
-          id: reg?.id ?? "",
-          password: reg?.password ?? "",
-        };
+        // quitar id y passwor de data
+        const { id, password, ...newData } = data;
+        //const reg = await register(data);
+        // const newData = {
+        //   ...data,
+        //   id: reg?.id ?? "",
+        //   password: reg?.password ?? "",
+        // };
         await toast.promise(
           createPersonService(newData).then((res) => {
             if (!res.success) {

@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
   Put,
@@ -53,7 +55,12 @@ export class PersonController {
   @UseGuards(SupabaseAuthGuard)
   @Post('/create')
   async create(@Body() personDto: CreatePersonDto) {
-    return this.personService.create(personDto);
+    const exists = await this.personService.existsByDocument(personDto.document);
+    if (exists) {
+      throw new HttpException("Registro duplicado (violación de índice único).", HttpStatus.CONFLICT);
+    }
+    const userId = await this.personService.registerUser(personDto.email);
+    return this.personService.create(personDto, userId);
   }
   @UseGuards(SupabaseAuthGuard)
   @Put('/update-profile')
