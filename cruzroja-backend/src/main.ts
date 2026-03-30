@@ -14,6 +14,8 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+  app.setGlobalPrefix("api/v1");
+
   const allowedOrigins = process.env.ALLOWED_ORIGINS;
 
   app.useGlobalFilters(new GlobalHttpExceptionFilter());
